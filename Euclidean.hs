@@ -1,5 +1,9 @@
+-- Vertices
 data Vertex = Vertex { x :: Float, y :: Float, z :: Float } deriving (Eq, Read, Show)
-type PointCloud = [Vertex] --this is what's called a *type synonym*, i.e. "just new notation"
+
+instance Monoid Vertex where
+    (Vertex x y z) <> (Vertex x' y' z') = Vertex (x + x') (y + y') (z + z)
+    mempty = Vertex 0 0 0
 
 distance :: Vertex -> Vertex -> Float
 distance (Vertex x y z) (Vertex x' y' z') = sqrt $ dx + dy + dz
@@ -7,17 +11,33 @@ distance (Vertex x y z) (Vertex x' y' z') = sqrt $ dx + dy + dz
           dy = (y-y') ** 2
           dz = (z-z') ** 2
 
--- Let's rewrite addition using *monoids* (not monads!) (https://hackage.haskell.org/package/base-4.15.0.0/docs/Data-Monoid.html)
--- To make Vertex an instance of the Monoid type class, we must define two things:
---     mempty :: Vertex
---     <> :: Vertex -> Vertex -> Vertex
--- These should satisfy (although this is *not* enforced by the compiler (because Haskell doesn't have dependent types))
---     mempty <> v = v
---     v <> mempty = v
---     (u <> v) <> w = u <> (v <> w)
-instance Monoid Vertex where
-    (Vertex x y z) <> (Vertex x' y' z') = Vertex (x + x') (y + y') (z + z)
-    mempty = Vertex 0 0 0
+scaleVertex :: Vertex -> Float -> Vertex
+scaleVertex (Vertex x y z) s = Vertex (s * x) (s * y) (s * z)
+
+
+-- Edges
+data HalfEdge = HalfEdge { u :: Vertex, v :: Vertex } deriving (Eq, Read, Show)
+
+-- Tim: rewrite this in a Haskell-y-er way
+edgeLength :: HalfEdge -> Float
+edgeLength (HalfEdge u v) = distance u v
+
+-- Tim: rewrite this in a Haskell-y-er way
+mirrorEdge :: HalfEdge -> HalfEdge
+mirrorEdge (HalfEdge u v) = HalfEdge v u
+
+splitEdge :: HalfEdge -> (HalfEdge, HalfEdge)
+splitEdge (HalfEdge u v) = (firstHalf, secondHalf)
+    where midpoint = scaleVertex (u <> v) 0.5
+          firstHalf = HalfEdge u midpoint
+          secondHalf = HalfEdge midpoint v
+
+
+-- Point clouds
+type PointCloud = [Vertex] --this is what's called a *type synonym*, i.e. "just new notation"
+
+
+-- Testing
 
 vertex1 = Vertex 1 2 3 
 vertex2 = Vertex 1 2 3 
