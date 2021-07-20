@@ -44,14 +44,17 @@ splitTriangle (a, b, c) b = splitTriangle (b, c, a) b
 splitTriangle (a, b, c) c = splitTriangle (c, a, b) c
 splitTriangle _           = Nothing
 
+-- Forces
+-- Tim: find an existing Type?
+type Vector = (Float, Float, Float)
+data Particle = Particle { point :: Vertex, velocity :: Vector }
 
--- Point clouds
-type PointCloud = [Vertex] --this is what's called a *type synonym*, i.e. "just new notation"
+repulsion :: [Particles] -> [Particles]
 
+pairwiseRepulsion :: Particle -> Particle -> Vector
+-- TO-DO: this is currently just a scalar!
+-- pairwiseRepulsion (Particle p v) (Particle p' v') = exp . negate . distance $ p p'
 
--- Testing
+-- Meshes
+data Mesh = Mesh { vertices :: [Particle], edges :: [HalfEdge], triangles :: [Triangle] }
 
-vertex1 = Vertex 1 2 3 
-vertex2 = Vertex 1 2 3 
-vertex3 = Vertex 1 2 3 
-vertexCloud = PointCloud [vertex1,vertex2,vertex3]
